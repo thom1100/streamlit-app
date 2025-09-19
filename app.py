@@ -30,7 +30,7 @@ def main():
     st.write("Dimension du test final:", test.shape)
 
     st.header("4. Quelques statistiques rapides")
-    st.write(train['bike_log_count'].describe())
+    st.write(train.describe())
 
 if __name__ == "__main__":
     main()
