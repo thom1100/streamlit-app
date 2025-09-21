@@ -23,7 +23,7 @@ build:
     - name: docker:24-dind
       command: ["--tls=false"]
   variables:
-    DOCKER_TLS_CERTDIR: ""   # indispensable pour que ça marche
+    DOCKER_TLS_CERTDIR: ""
   script:
     - docker build -t $IMAGE_NAME .
     - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
