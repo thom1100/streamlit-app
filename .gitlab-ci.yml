@@ -1,63 +1,18 @@
 stages:
   - test
   - build
-  - publish
-
-variables:
-  IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
-  DOCKERHUB_IMAGE: $DOCKERHUB_USERNAME/streamlit-bike:latest
 
 test:
-  stage: test
   image: python:3.10
   script:
-    - pip install --upgrade pip
     - pip install -r requirements.txt
-    - pytest -q || echo "No tests found, skipping."
-
+    - pytest -q
 
 build:
-  image: docker:24
   stage: build
-  services:
-    - name: docker:24-dind
-      command: ["--tls=false"]
-  variables:
-    DOCKER_TLS_CERTDIR: ""
+  image:
+    name: gcr.io/kaniko-project/executor:latest
+    entrypoint: [""]
   script:
-    - docker build -t $IMAGE_NAME .
-    - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
-  only:
-    - main
-
-publish-gitlab:
-  image: docker:24
-  stage: publish
-  services:
-    - name: docker:24-dind
-      command: ["--tls=false"]
-  script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
-    - docker push $IMAGE_NAME
-    - docker push $CI_REGISTRY_IMAGE:latest
-  only:
-    - main
-  needs: ["build"]
-
-publish-dockerhub:
-  image: docker:24
-  stage: publish
-  services:
-    - name: docker:24-dind
-      command: ["--tls=false"]
-  variables:
-    DOCKERHUB_IMAGE: $DOCKERHUB_USERNAME/streamlit-app:$CI_COMMIT_SHORT_SHA
-  script:
-    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-    - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
-    - docker tag $IMAGE_NAME $DOCKERHUB_USERNAME/streamlit-app:latest
-    - docker push $DOCKERHUB_IMAGE
-    - docker push $DOCKERHUB_USERNAME/streamlit-app:latest
-  only:
-    - main
-  needs: ["build"]
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_HUB_USERNAME\",\"password\":\"$DOCKER_HUB_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $DOCKER_HUB_USERNAME/streamlit-app:latest
