@@ -18,7 +18,7 @@ build:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - docker login -u "thom1100"
+    - docker login -u "thom1100" -p "dckr_pat_F7AqiXh3XO4w3BOOp2sXA_RT_uU"
   script:
     - docker build -t $thom1100/streamlit-app:latest .
     - docker push $thom1100/streamlit-app:latest
