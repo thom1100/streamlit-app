@@ -11,7 +11,7 @@ test:
     - pytest -q || echo "No tests found, skipping."
 
 
-  docker-build:
+docker-build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:latest
