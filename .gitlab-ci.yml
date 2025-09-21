@@ -14,7 +14,7 @@ test:
 docker-build:
   stage: build
   image:
-    name: gcr.io/kaniko-project/executor:latest
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
     - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"thom1100\",\"password\":\"dckr_pat_F7AqiXh3XO4w3BOOp2sXA_RT_uU\"}}}" > /kaniko/.docker/config.json
