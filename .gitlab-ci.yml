@@ -20,33 +20,44 @@ build:
   image: docker:24
   stage: build
   services:
-    - docker:24-dind
+    - name: docker:24-dind
+      command: ["--tls=false"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""   # indispensable pour que ça marche
   script:
     - docker build -t $IMAGE_NAME .
     - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
-  artifacts:
-    expire_in: 1h
-    paths:
-      - .
+  only:
+    - main
 
 publish-gitlab:
   image: docker:24
   stage: publish
   services:
-    - docker:24-dind
+    - name: docker:24-dind
+      command: ["--tls=false"]
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
     - docker push $IMAGE_NAME
+    - docker push $CI_REGISTRY_IMAGE:latest
   only:
     - main
+  needs: ["build"]
 
 publish-dockerhub:
   image: docker:24
   stage: publish
   services:
-    - docker:24-dind
+    - name: docker:24-dind
+      command: ["--tls=false"]
+  variables:
+    DOCKERHUB_IMAGE: $DOCKERHUB_USERNAME/streamlit-app:$CI_COMMIT_SHORT_SHA
   script:
     - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
+    - docker tag $IMAGE_NAME $DOCKERHUB_USERNAME/streamlit-app:latest
     - docker push $DOCKERHUB_IMAGE
+    - docker push $DOCKERHUB_USERNAME/streamlit-app:latest
   only:
     - main
+  needs: ["build"]
