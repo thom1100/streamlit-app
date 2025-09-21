@@ -1,0 +1,24 @@
+# Environnements virtuels
+.venv/
+venv/
+ENV/
+
+# Fichiers temporaires / caches Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.log
+
+# Fichiers spécifiques à Jupyter/Streamlit
+.ipynb_checkpoints/
+.streamlit/
+
+# OS / éditeur
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
