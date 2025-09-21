@@ -3,11 +3,11 @@ stages:
   - build
   - publish
 
-# Variables utiles
 variables:
   IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
+  DOCKERHUB_IMAGE: $DOCKERHUB_USERNAME/streamlit-bike:latest
 
-# 1) Étape de tests
+# 1) Tests unitaires
 test:
   image: python:3.10
   stage: test
@@ -17,19 +17,22 @@ test:
   script:
     - pytest -q
 
-# 2) Étape de build docker
+# 2) Build de l'image (utilisée ensuite pour publish)
 build:
   image: docker:24
   stage: build
   services:
-    - docker:24-dind   # Docker-in-Docker pour builder
+    - docker:24-dind
   script:
     - docker build -t $IMAGE_NAME .
-  only:
-    - main
+    - docker tag $IMAGE_NAME $DOCKERHUB_IMAGE
+  artifacts:
+    expire_in: 1h
+    paths:
+      - .
 
-# 3) (Optionnel) Étape de publication sur le registry interne GitLab
-publish:
+# 3) Push vers le registry GitLab interne
+publish-gitlab:
   image: docker:24
   stage: publish
   services:
@@ -37,5 +40,17 @@ publish:
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
     - docker push $IMAGE_NAME
+  only:
+    - main
+
+# 4) Push vers DockerHub public
+publish-dockerhub:
+  image: docker:24
+  stage: publish
+  services:
+    - docker:24-dind
+  script:
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - docker push $DOCKERHUB_IMAGE
   only:
     - main
