@@ -1,0 +1,41 @@
+stages:
+  - test
+  - build
+  - publish
+
+# Variables utiles
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
+
+# 1) Étape de tests
+test:
+  image: python:3.10
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - pytest -q
+
+# 2) Étape de build docker
+build:
+  image: docker:24
+  stage: build
+  services:
+    - docker:24-dind   # Docker-in-Docker pour builder
+  script:
+    - docker build -t $IMAGE_NAME .
+  only:
+    - main
+
+# 3) (Optionnel) Étape de publication sur le registry interne GitLab
+publish:
+  image: docker:24
+  stage: publish
+  services:
+    - docker:24-dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
+    - docker push $IMAGE_NAME
+  only:
+    - main
