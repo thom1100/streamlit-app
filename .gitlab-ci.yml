@@ -18,9 +18,9 @@ build:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
+    - docker login -u "thom1100" -p "$DOCKER_HUB_PASSWORD"
   script:
-    - docker build -t $DOCKER_HUB_USERNAME/streamlit-app:latest .
-    - docker push $DOCKER_HUB_USERNAME/streamlit-app:latest
-    - docker tag $DOCKER_HUB_USERNAME/streamlit-app:latest $DOCKER_HUB_USERNAME/streamlit-app:$CI_COMMIT_SHORT_SHA
-    - docker push $DOCKER_HUB_USERNAME/streamlit-app:$CI_COMMIT_SHORT_SHA
+    - docker build -t $thom1100/streamlit-app:latest .
+    - docker push $thom1100/streamlit-app:latest
+    - docker tag $thom1100/streamlit-app:latest $thom1100/streamlit-app:$CI_COMMIT_SHORT_SHA
+    - docker push $thom1100/streamlit-app:$CI_COMMIT_SHORT_SHA
