@@ -10,17 +10,16 @@ test:
     - pip install -r requirements.txt
     - pytest -q || echo "No tests found, skipping."
 
-build:
+
+  docker-build:
   stage: build
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-  before_script:
-    - docker login -u "thom1100" -p "dckr_pat_F7AqiXh3XO4w3BOOp2sXA_RT_uU"
+  image:
+    name: gcr.io/kaniko-project/executor:latest
+    entrypoint: [""]
   script:
-    - docker build -t $thom1100/streamlit-app:latest .
-    - docker push $thom1100/streamlit-app:latest
-    - docker tag $thom1100/streamlit-app:latest $thom1100/streamlit-app:$CI_COMMIT_SHORT_SHA
-    - docker push $thom1100/streamlit-app:$CI_COMMIT_SHORT_SHA
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"thom1100\",\"password\":\"dckr_pat_F7AqiXh3XO4w3BOOp2sXA_RT_uU\"}}}" > /kaniko/.docker/config.json
+
+    - /kaniko/executor
+        --context $CI_PROJECT_DIR
+        --dockerfile $CI_PROJECT_DIR/Dockerfile
+        --destination $DOCKER_HUB_USERNAME/streamlit-app:latest
